@@ -7,21 +7,18 @@
 extern struct client_state client_global;
 
 int connect_to_server(struct client_state *client) {
-    // Obtener la clave del servidor
     key_t server_key = ftok(SERVER_KEY_PATHNAME, PROJECT_ID);
     if (server_key == -1) {
         perror("ftok");
         return -1;
     }
     
-    // Conectar a la cola del servidor
     client->server_qid = msgget(server_key, 0);
     if (client->server_qid == -1) {
         perror("msgget (servidor no encontrado)");
         return -1;
     }
     
-    // Crear cola propia del cliente
     client->pid = getpid();
     key_t client_key = ftok(SERVER_KEY_PATHNAME, client->pid);
     if (client_key == -1) {
@@ -176,7 +173,6 @@ void* message_listener(void *arg) {
     struct message msg;
     
     while (client->running) {
-        // Escuchar mensajes del servidor
         ssize_t result = msgrcv(client->client_qid, &msg, sizeof(msg.data), 0, 0);
         
         if (result == -1) {
@@ -187,7 +183,6 @@ void* message_listener(void *arg) {
             break;
         }
         
-        // Procesar el mensaje según su tipo
         switch (msg.message_type) {
             case MSG_SERVER_RESPONSE:
                 handle_server_response(&msg);
@@ -207,12 +202,9 @@ void* message_listener(void *arg) {
 void handle_server_response(struct message *msg) {
     printf("\n[SERVIDOR]: %s\n", msg->data.content);
     
-    // Actualizar estado del cliente según la respuesta
     if (msg->data.response_code == RESPONSE_SUCCESS) {
         if (strstr(msg->data.content, "unido al canal") != NULL) {
             client_global.in_channel = 1;
-            // El nombre del canal debería estar en channel_name, pero como fallback
-            // podemos intentar extraerlo del mensaje
         } else if (strstr(msg->data.content, "salido del canal") != NULL) {
             client_global.in_channel = 0;
             client_global.current_channel[0] = '\0';
@@ -224,7 +216,6 @@ void handle_server_response(struct message *msg) {
 }
 
 void handle_broadcast_message(struct message *msg) {
-    // Mostrar mensajes de otros usuarios
     if (strcmp(msg->data.sender_name, "Sistema") == 0) {
         printf("\n[%s]: %s\n", msg->data.sender_name, msg->data.content);
     } else {
@@ -237,7 +228,7 @@ void handle_broadcast_message(struct message *msg) {
 void cleanup_client(struct client_state *client) {
     if (client->in_channel) {
         send_leave_request(client);
-        sleep(1); // Esperar 1 segundo para que se procese la salida
+        sleep(1);
     }
     
     if (client->client_qid != -1) {

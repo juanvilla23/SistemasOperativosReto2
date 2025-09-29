@@ -18,7 +18,6 @@ int main() {
         return 1;
     }
     
-    // Remover salto de línea
     client_global.name[strcspn(client_global.name, "\n")] = '\0';
     
     if (strlen(client_global.name) == 0) {
@@ -26,7 +25,6 @@ int main() {
         return 1;
     }
     
-    // Conectar al servidor
     if (connect_to_server(&client_global) != 0) {
         printf("Error conectando al servidor\n");
         return 1;
@@ -35,11 +33,9 @@ int main() {
     printf("\n¡Conectado al servidor exitosamente!\n");
     printf("Escribe 'help' para ver los comandos disponibles\n\n");
     
-    // Configurar manejo de señales
     signal(SIGINT, signal_handler_client);
     signal(SIGTERM, signal_handler_client);
     
-    // Crear hilo para escuchar mensajes del servidor
     pthread_t listener_thread;
     if (pthread_create(&listener_thread, NULL, message_listener, &client_global) != 0) {
         printf("Error creando hilo de escucha\n");
@@ -47,7 +43,6 @@ int main() {
         return 1;
     }
     
-    // Bucle principal de comandos
     while (client_global.running) {
         printf("> ");
         fflush(stdout);
@@ -56,16 +51,13 @@ int main() {
             break;
         }
         
-        // Remover salto de línea
         input[strcspn(input, "\n")] = '\0';
         
-        // Parsear comando y argumento
         int parsed = sscanf(input, "%49s %255[^\n]", command, argument);
         if (parsed < 1) {
             continue;
         }
         
-        // Procesar comandos
         if (strcmp(command, "help") == 0) {
             show_help();
         }
@@ -118,7 +110,6 @@ int main() {
         }
     }
     
-    // Limpiar y salir
     client_global.running = 0;
     pthread_cancel(listener_thread);
     pthread_join(listener_thread, NULL);

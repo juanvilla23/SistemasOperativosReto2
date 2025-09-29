@@ -10,6 +10,9 @@ a.out
 *.su
 *.idb
 *.pdb
+*.out
+client_app
+server_app
 
 # Temporary files
 *~
