@@ -1,0 +1,35 @@
+# Build artifacts
+*.o
+*.obj
+*.exe
+a.out
+*.lib
+*.dll
+*.so
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Temporary files
+*~
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# IDE-specific files (examples for common IDEs)
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Compilation directories (if used)
+build/
+bin/
+obj/
+
+# Debugging information
+*.log
+*.gdb_history
